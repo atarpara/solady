@@ -927,6 +927,7 @@ contract FixedPointMathLibTest is SoladyTest {
         assertEq(FixedPointMathLib.log2(4), 2);
         assertEq(FixedPointMathLib.log2(10), 3);
         assertEq(FixedPointMathLib.log2(20), 4);
+        assertEq(FixedPointMathLib.log2(30), 4);
         assertEq(FixedPointMathLib.log2(1024), 10);
         assertEq(FixedPointMathLib.log2(1048576), 20);
         assertEq(FixedPointMathLib.log2(1073741824), 30);
