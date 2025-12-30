@@ -121,7 +121,11 @@ jobs:
 
   gas-diff:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -146,6 +150,39 @@ jobs:
         with:
           name: gas-diff
           path: gas-diff/
+  
+  post-gas-diff-comment:
+    if: github.event_name == 'pull_request'
+    needs: gas-diff
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+    permissions:
+      pull-requests: write
+      actions: read
+    steps:
+      - name: Download gas diff artifact
+        uses: dawidd6/action-download-artifact@v12
+        with:
+          name: gas-diff
+          run_id: ${{ github.run_id }}
+          
+      - name: Read gas diff
+        id: gas_diff
+        run: |
+          if [ -f comment.md ]; then
+            echo "markdown<<EOF" >> $GITHUB_OUTPUT
+            cat comment.md >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Add gas diff to sticky comment
+        if: steps.gas_diff.outputs.markdown
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          message: ${{ steps.gas_diff.outputs.markdown }}
 
   prep-checker:
     runs-on: ${{ matrix.os }}
